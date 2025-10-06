@@ -1,0 +1,155 @@
+---
+author: Jowoosung
+title: tomatoAgent Server 구성기 
+featured: true
+draft: false
+slug: tomatoAgent-Server-구성기 
+pubDatetime: 2024-09-18T15:22:00Z
+modDatetime: 2024-09-18T16:52:45.934Z
+description: 기존에 개발한 서버를 개선하여 구성한 방법
+tags: 
+  - infra
+---  
+
+## Table of contents
+
+## 프로젝트 바로가기 
+[https://github.com/Oldentomato/tomatoAgentApp](https://github.com/Oldentomato/tomatoAgentApp)
+
+## 기능 소개  
+이 프로젝트는 기존에 개발한 tomatoAgent의 서버부분을 개선시킨 프로젝트이다.  
+예전 프로젝트에는 langchain을 주로 사용하여 gpt의 agent기능을 사용했는데 확실히 간단하게 함수만으로 구성할 수 있어 편했으나,
+너무 많은 기능과 커스터마이징의 한계로 인해서 차라리 openAI 라이브러리만 사용해서 만드는 것이 낫겠다고 판단되어서 새로 개발하게 되었다.  
+그리고 기존 프로젝트의 서버는 단순한 형태로 구성되어 있어서, 성능 향상과 확장성을 고려하여 Redis와 MSA구조를 도입하게 되었다.  
+사용된 기술스택은 다음과 같다.  
+### BackEnd
+    - FastAPI
+    - Redis
+    - MongoDB
+    - MongoDB Express (dev)
+    - Docker
+    - Docker Compose (dev)
+    - Portainer (dev)
+    - Docker Swarm
+    - traefik
+    - openAI
+### FrontEnd
+    - Electron
+    - React
+
+## 왜 traefik인가
+역방향 프록시 서버는 처음에는 nginx를 사용하려 했다.  
+하지만 docker swarm처럼 orchestrator에는 사용이 적합하지 않다는 내용을 보게 되었다.   
+컨테이너를 인식하는 기능자체가 없어 대부분 헬퍼툴을 사용한다는데, 비용이나 부실한 내용 등 사용에 어려움이 많다고 한다.  
+traefik은 기본적으로 헬퍼 툴로 구현되어 있다고 한다.  
+게다가 문서도 잘 정리되어 있고, 최신 툴 답게 서드파티 모듈을 사용할 필요가 없도록 구성되어있어 몇몇 기업은 nginx 대신 traefik을 사용한다고 한다.  
+
+## 왜 Docker Swarm인가
+MSA를 구성을 할때는 대부분 Kubernetes를 사용한다.  
+안정적이면서 다양한 기능이 있고, 거대한 커뮤니티가 활성화 되어있어 수많은 기업에서 많이 사용한다.  
+하지만 Kubernetes 자체가 기능이 많은 만큼 무겁고 느리다. 심지어 세팅을 할 때도 많은 작업이 필요하기 때문에 대규모 프로젝트에 적합하다.  
+이 프로젝트는 그만큼 큰 프로젝트는 아니기 때문에, Kubernetes와 목적은 같지만 좀 더 가볍고 사용하기 편한 Docker Swarm을 사용하게 되었다.  
+Kubernetes만큼 기능이 많지는 않지만 기본적인 구성을 갖출 수 있고, docker compose에서 변형하여 사용할 수 있어 손쉽게 접근이 가능하다.  
+ 
+## 왜 Redis인가
+각 요청이 들어올 때마다 유저별 클래스 객체를 인스턴스하고, db에서 유저의 정보를 가져온 다음, 소스코드를 실행하게 된다.   
+채팅을 보낼 때마다 이러한 작업들이 이루어지면 쓸데없는 반복작업이 이루어지기 때문에 속도가 빠르지 않다.  
+그러기에, 미리 데이터를 유저별로 메모리상에 저장해두고 요청할 때마다 디스크가 아닌 메모리에서 데이터를 가져오게 한다면 더 빠르게 처리할 수 있을 것이다.  
+
+## 서버 구조  
+![img1](https://github.com/Oldentomato/PortFolio_Next/blob/main/postsimg/post_1/img_1.png?raw=true)  
+- docker swarm을 이용하여 해당 서비스 스택을 deploy함  
+- traefik을 이용하여 dns 주소에 따른 L7 로드밸런싱을 구축함 
+- 443은 https, 80은 http에서 https로 리다이렉트를 진행 (middleware)  
+- 현재는 모든 서버가 하나의 db를 바라보도록 했지만 추후에 db를 수평확장할 예정  
+- fastAPI서버는 Docker Swarm을 이용하여 3개의 replica를 생성하고 L4 로드밸런싱을 이용하여 트래픽을 분산시킴
+- traefik의 로그를 프로메테우스가 수집  
+- 수집한 내용을 그라파나로 시각화  
+- 이미지에는 없지만 도커 소켓 프록시를 생성하여 traefik에서 바로 docker.sock에 접근하지 않도록 구성
+
+## 개발 환경 구조
+### 코드 작성 환경
+![img2](https://github.com/Oldentomato/PortFolio_Next/blob/main/postsimg/post_1/img_2.png?raw=true)  
+- code-server 도커 이미지를 활용하여 웹으로 vscode를 이용할 수 있는 컨테이너 생성함
+- volume 으로 서버에 저장된 프로젝트 경로와 bind함  
+- 실시간으로 서로의 코드 변경이 반영됨  
+- code-server 와 mongoDB Express의 포트를 외부 포트포워딩하여 외부에서 접속가능하도록 함  
+
+### 시각화 서버 환경
+![img3](https://github.com/Oldentomato/PortFolio_Next/blob/main/postsimg/post_1/img_3.png?raw=true)  
+- Portainer와 Mongo Express를 이용하여 컨테이너 환경과 DB구성을 웹으로 확인할 수 있게 구성함
+
+## Docker Swarm 네트워크 구성  
+```bash 
+# ingress 네트워크 삭제 후 재생성
+docker network rm ingress
+docker network create --ingress --driver overlay \
+   --opt encrypted --subnet 10.10.0.0./16 ingress
+
+# cloud-edge / cloud-public / cloud-socket-proxy 생성
+docker network create --subnet 10.11.0.0/16 --driver overlay \
+  --scope swarm --opt encrypted --attachable cloud-edge
+
+docker network create --subnet 10.12.0.0/16 --driver overlay \
+  --scope swarm --opt encrypted --attachable cloud-socket-proxy
+
+docker network create --subnet 10.13.0.0/16 --driver overlay \
+  --scope swarm --opt encrypted --attachable cloud-public
+```
+위 내용처럼 도커 네트워크를 구성해준다. 각 네트워크의 용도는 다음과 같다.  
+- cloud-edge (for Traefik 2)
+- cloud-public (인터넷에 노출시킬 서비스용)
+- cloud-socket-proxy (docker socket proxy - 보안 목적)
+우선 ingress 네트워크는 Docker Swarm 모드에서 서비스 간의 통신을 관리하고, 외부에서 Swarm 클러스터 내에 있는 서비스로의 트래픽을 전달하기 위한 특별한 네트워크이다.  
+그리고 이러한 컨테이너와 서비스 간의 트래픽 라우팅을 원활하게 처리해준다.
+여기서 ingress네트워크를 삭제했다가 다시 생성해주는 이유는 기본적으로 생성된 ingress 네트워크는 암호화되지 않기 때문에 --opt encrypted 옵션을 이용해서 암호화 네트워크를 수동으로 생성해준 것이다.  
+그리고 subnet 옵션은 Docker 네트워크를 생성할 때 IP 주소 대역(IP 주소 범위)을 지정하는 데 사용된다.  
+이를 통해 네트워크에 속한 컨테이너들이 특정한 IP 주소 대역 내에서 IP 주소를 할당받도록 설정할 수 있다.  
+```bash 
+docker network create --ingress --driver overlay \
+   --opt encrypted --subnet 10.10.0.0./16 ingress
+```
+위 명령어에서 Docker 네트워크에 연결된 컨테이너들이 10.10.0.0부터 10.10.255.255까지의 IP 주소 범위 내에서 IP를 할당받게 만든다.  
+ /16은 서브넷 마스크를 나타내며, 이를 통해 IP 주소 범위를 정의한다.  
+
+
+## TLS 설정  
+ TLS설정을 위한 파일의 내용은 다음과 같다.  
+ dynamic_conf.toml
+ ```toml 
+ [tls.options]
+  [tls.options.default]
+    minVersion = "VersionTLS13"
+    sniStrict = true
+
+  [tls.options.tls12]
+    minVersion = "VersionTLS12"
+    sniStrict = true
+    cipherSuites = [
+      "TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384",
+      "TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384",
+      "TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256",
+      "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256",
+      "TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305",
+      "TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305"
+    ]
+ ```
+위 코드는 traefik에서 https로 연결할 때 보안 강도를 조절하는 코드이다.  
+tls의 버전을 몇으로 사용할 것인지, 암호화방식은 어떤방식으로 할지를 설정하는 코드이다.  
+
+## 로드밸런싱 구조  
+로드밸런서는 L4,L7을 같이 사용하였다. 자세한 내용은 다음 포스트에 작성했다.  
+[로드밸런싱 구현 정리](https://wsportfolio.vercel.app/blog/post_5)  
+
+## 젠킨스로 자동 서버 배포  
+![img4](https://github.com/Oldentomato/PortFolio_Next/blob/main/postsimg/post_1/img_4.png?raw=true)  
+위의 구조대로 젠킨스가 작동되도록 설계했다.  
+개발환경 code-server에서 git push를 할 경우 위 프로세스가 진행되어 무중단 배포를 구현했다.  
+그리고 젠킨스 내부에서 도커를 활용할 때 추가로 작업해야할 것이 있다. 그 내용은 다음 포스트에 있다.  
+[젠킨스와 도커](https://wsportfolio.vercel.app/blog/post_4)  
+
+## CodeArchive  
+tomatoAgent의 기능 중 하나로, openAI를 활용한 도구이다.  
+이 기능에 대한 자세한 내용은 다음 게시물에 정리했다.  
+[게시물 이동하기](https://wsportfolio.vercel.app/blog/post_3)  
+

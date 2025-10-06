@@ -1,0 +1,214 @@
+---
+author: Jowoosung
+title: fastapi를 이용한 ai 서버 구축
+featured: true
+draft: false
+slug: fastapi를-이용한-ai-서버-구축
+pubDatetime: 2023-05-29T15:22:00Z
+modDatetime: 2023-05-29T16:52:45.934Z
+description: 캡스톤디자인용 서버구축하는 법
+tags: 
+  - ai
+  - infra
+---  
+
+## Table of contents
+
+## 도커를 이용한 fastapi와 mysql서버 구축
+### 도커 설정
+우선 mysql도커 컨테이너를 생성해야 한다. 명령어는 아래와 같다.  
+```bash
+docker run -it -e MYSQL_ROOT_PASSWORD=(mysql 비밀번호) --name yamingdatabase -d -p 5000:3306 -v /home/jwsjws99/yaming:/data mysql
+```
+포트포워딩은 왼쪽은 외부로 연결할 포트이고 오른쪽은 내부포트이다. 왼쪽 포트번호는 gpc의 방화벽 설정에서 외부로 연결할 포트번호로 해주면 된다. 내부포트번호는 mysql의 기본 포트번호이다.  
+디렉토리는 gcp의 가상환경 디렉토리 기준이다.  
+도커 옵션은 아래와 같다.  
+- -i: 컨테이너를 실행할 때 컨테이너 쪽 표준 입력과의 연결을 그대로 유지한다. 그러므로 컨테이너 쪽 셀에 들어가서 명령어를 실행할 수 있다.  
+- -t: 유사터미널 기능을 활성화하는 옵션이다. 여기서 i옵션을 사용하지 않으면 유사 터미널을 실행해도 입력할 수가 없으므로 통상적으로 -it를 합쳐서 사용한다.  
+- -d: deamon 옵션으로서 도커가 백그라운드에서 계속 실행되게 한다.  
+
+### python mysql  
+mysql을 연결할 모듈로는 pymysql을 이용했다.  
+연결 코드는 아래와 같다.  
+```python
+import mysql 
+
+def send_query(query:str):
+    con = pymysql.connect(host='연결할 주소', user='유저명', password='비밀번호', port=5000, db='db명', charset='utf8')
+
+    cur = con.cursor() # Connection으로부터 Cursor 생성
+
+    sql = query
+    cur.excute(sql)
+
+    con.close()
+
+    rows = cur.fetchall()
+    print(rows)
+
+    return rows
+```
+연결과 쿼리실행까지 되는 코드를 함수화하여 다른곳에서 바로 쓸 수 있도록 작성했다. 
+
+### ai서버 도커 설정  
+다음과 같은 Dockerfile을 작성해주었다.  
+```Dockerfile
+FROM python:3.9
+COPY /api /app/api
+COPY requirements.txt requirements.txt
+
+ENV MYSQLHOST 'gcp외부 ip'
+ENV MYSQLUSER 'root'
+ENV MYSQLPASS 'sql 비밀번호'
+ENV MYSQLPORT 5000
+ENV MYSQLDB 'yaming'
+
+RUN apt-get update && \
+    python -m pip install --upgrade pip && \
+    apt-get -y install libgl1-mesa-glx && \
+    pip install -r requirements.txt
+
+WORKDIR /app
+
+RUN mkdir test_image
+
+CMD uvicorn api.api:app --host=0.0.0.0
+```
+libgl1-mesa-glx는 opencv-python을 사용할 때 필요한 모듈이다. 설치하지 않으면 에러가 발생한다.  
+
+ENV는 도커 컨테이너 내부에 쓸수있는 환경변수이다. 실제코드에서는 아래와 같이 작성하면 참조할 수 있다.  
+```python 
+import os
+import pymysql
+con = pymysql.connect(host=os.environ['MYSQLHOST']...)
+```
+
+
+### 이미지 업로드  
+이제 fastapi를 이용하여 이미지 업로드와 ai로 검증하는 코드를 작성한다.  
+먼저 sql를 이용하여 유저id로 이미지를 저장할 디렉토리가 존재하는지 검색한다.  
+디렉토리가 없다면 디렉토리를 새로 생성해준다.  
+이미지와 유저id를 같이 넘겨야하는데, 유저아이디는 쿼리 매개변수를 이용하여 넘겨준다.  
+쿼리는 URL에서 ? 후에 나오고 &으로 구분되는 키-값 쌍의 집합이다.  
+조회된 데이터가 없을 경우 0을 리턴하도록 해야하는데 쿼리문에서 ifnull을 활용하여 구성했다.  
+이미지명은 uuid 모듈을 이용하여 랜덤으로 유니크한 파일명으로 변경하고 저장해준다.  
+그 뒤, 해당 이미지를 ai로 검증하고 return에서 결과를 보내준다. 아래가 전체코드이다.  
+```python
+class User(BaseModel):
+    id: int 
+    name: str
+    nickname: str
+    user_id: str
+    user_password: str
+    user_email: str
+    user_phone: str
+...
+@app.post("/imagetest/")
+async def imagetest(file: UploadFile, userid: int):
+    UPLOAD_DIR = "../test_image"
+    result = send_query("select ifnull(max(name),0) name from user where usernum='"+str(userid)+"'")
+    username = result[0][0] #이중 튜플로 되어있어서 풀어줌
+
+    if username != '0': #유저 조회 중 있을 경우
+        if str(userid) not in os.listdir(UPLOAD_DIR): #이미지 디렉토리에 유저가 없을 경우
+            os.mkdir(os.path.join(UPLOAD_DIR,str(userid)))
+
+        content = await file.read()
+        filename = f"{str(uuid.uuid4())}.jpg" 
+        with open(os.path.join(UPLOAD_DIR,str(userid),filename),"wb") as fp:
+            fp.write(content) #서버 로컬 스토리지에 이미지 저장
+
+        detect_module = Detect_Image(model_name = "best_2",
+                                    img_path = os.path.join(UPLOAD_DIR,str(userid),filename),
+                                    weight_path = "../model/best_2.pt")
+
+        model_result = detect_module.detect()
+        return {"filename": filename, "success": True, "category": category[model_result], "food_code": model_result}
+
+    else: #유저가 없을 경우
+        return {"error": "not checked user", "success": False}
+```
+참고로 fastapi 실행법은 아래와 같다.  
+uvicorn main:app --reload
+- main: 파일 main.py
+- app: main.py 내부의 app = FastAPI() 줄에서 생성한 오브젝트
+- --reload: 코드 변경 후 서버 재시작. 개발에만 사용.  
+
+### detect()함수 내용
+```python
+import torch
+import cv2
+import numpy as np
+import sys
+
+sys.path.append(r"/app")
+from models.experimental import attempt_load
+from utils.general import non_max_suppression,scale_coords
+from utils.torch_utils import time_synchronized
+from modules.get_img import letterbox
+
+
+class Detect_Image:
+    def __init__(self, model_name:str, img_path:str, weight_path:str):
+        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        self.model_name = model_name
+        self.img_path = img_path
+        self.weight_path = weight_path
+
+
+
+    def detect(self):
+        model = attempt_load(self.weight_path, map_location = self.device)
+        print("model loaded")
+        image = cv2.imread(self.img_path)
+        stride = int(model.stride.max())
+        # Padded resize
+        img = letterbox(image, 512, stride=stride)[0]
+
+        # Convert
+        img = img[:, :, ::-1].transpose(2, 0, 1)  # BGR to RGB, to 3x416x416
+        img = np.ascontiguousarray(img)
+
+        result_image = torch.from_numpy(img).to(self.device)
+        result_image = result_image.float()
+        result_image /= 255.0
+        if result_image.ndimension() == 3:
+            result_image = result_image.unsqueeze(0)
+
+        print("image loaded")
+
+        t1 = time_synchronized()
+        with torch.no_grad():
+            pred = model(result_image)[0]
+        t2 = time_synchronized()
+
+        pred = non_max_suppression(pred, 0.01, 0.45) # conf_thres, iou_thres
+        t3 = time_synchronized()
+
+        for i, det in enumerate(pred): #detections per image
+            if len(det):
+                result_cls = []
+                result_conf = []
+
+                for *xyxy,conf,cls in reversed(det):
+                    result_cls.append(int(cls.item()))
+                    result_conf.append(conf.item())
+
+                max_conf_index = result_conf.index(max(result_conf))
+                return result_cls[max_conf_index]
+            else:
+                return None
+```
+detect()코드는 기존 yolo코드에서 가져온 것이고 단일 이미지의 객체인식만(위치는 필요없음) 필요하기 때문에 코드를 개량했다. 하지만 깔끔하지는 못하다.  
+
+### 모듈 경로  
+fastapi를 이용하여 프로그램을 실행하면 모듈경로 에러가 발생하게 된다.  
+여러 방법이 있지만 sys 모듈의 path에 코드들이 모여있는 최상위 폴더를 추가하여 해결했다.  
+```python
+sys.path.append(r"D:\\yaming_dataset\\Yaming_AI\\api")
+```
+
+이번 내용은 pytorch의 yolo모델을 기준으로 작성했으나 모델의 학습속도에 비해 너무 낮은 성능을 보여주어 다른 방향을 선택했다.  
+다중 객체인식을 포기하고 단일 객체인식으로 바꾸고 텐서플로우의 vgg모델을 이용하기로 했다.  
+다음 게시물에 tensorflow training에 대한 내용과 배포하는것 까지 작성하도록 하겠다.  
+    
