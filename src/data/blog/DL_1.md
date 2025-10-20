@@ -1,7 +1,7 @@
 ---
 author: Jowoosung
 title: 딥러닝 모델 확장자
-featured: true
+featured: false
 draft: false
 slug: 딥러닝-모델-확장자
 pubDatetime: 2023-01-19T15:22:00Z

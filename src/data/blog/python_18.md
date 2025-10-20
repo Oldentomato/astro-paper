@@ -1,7 +1,7 @@
 ---
 author: Jowoosung
 title: docopt란
-featured: true
+featured: false
 draft: false
 slug: docopt란
 pubDatetime: 2023-08-07T15:22:00Z

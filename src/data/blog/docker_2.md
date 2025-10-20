@@ -1,7 +1,7 @@
 ---
 author: Jowoosung
 title: 도커관련 유용한 팁
-featured: true
+featured: false
 draft: false
 slug: 도커관련-유용한-팁
 pubDatetime: 2023-03-25T15:22:00Z

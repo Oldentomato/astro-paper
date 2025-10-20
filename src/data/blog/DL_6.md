@@ -1,7 +1,7 @@
 ---
 author: Jowoosung
 title: YOLO_v7 사용 팁
-featured: true
+featured: false
 draft: false
 slug: YOLO_v7-사용-팁
 pubDatetime: 2023-04-19T15:22:00Z

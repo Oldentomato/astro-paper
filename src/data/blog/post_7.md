@@ -1,7 +1,7 @@
 ---
 author: Jowoosung
 title: CORS에 대해
-featured: true
+featured: false
 draft: false
 slug: CORS에-대해
 pubDatetime: 2025-05-14T15:22:00Z

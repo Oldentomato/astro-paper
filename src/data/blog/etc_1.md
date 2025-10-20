@@ -1,7 +1,7 @@
 ---
 author: Jowoosung
 title: nextjs 배포와 검색엔진 최적화
-featured: true
+featured: false
 draft: false
 slug: nextjs-배포와-검색엔진-최적화
 pubDatetime: 2023-01-17T15:22:00Z

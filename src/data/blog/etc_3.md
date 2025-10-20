@@ -1,7 +1,7 @@
 ---
 author: Jowoosung
 title: npm 커스텀 SmsListener
-featured: true
+featured: false
 draft: false
 slug: npm-커스텀-SmsListener
 pubDatetime: 2023-04-08T15:22:00Z

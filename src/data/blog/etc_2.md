@@ -1,7 +1,7 @@
 ---
 author: Jowoosung
 title: docker-compose 와 kubernetes
-featured: true
+featured: false
 draft: false
 slug: docker-compose-와-kubernetes
 pubDatetime: 2023-01-26T15:22:00Z

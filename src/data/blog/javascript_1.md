@@ -1,7 +1,7 @@
 ---
 author: Jowoosung
 title: 자바스크립트 {...}[...] 문법에 대하여
-featured: true
+featured: false
 draft: false
 slug: 자바스크립트-{...}[...]-문법에 대하여
 pubDatetime: 2022-01-29T15:22:00Z

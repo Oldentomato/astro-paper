@@ -1,7 +1,7 @@
 ---
 author: Jowoosung
 title: feast 도커 빌드오류 해결법
-featured: true
+featured: false
 draft: false
 slug: feast-도커-빌드오류-해결법
 pubDatetime: 2023-01-17T15:22:00Z

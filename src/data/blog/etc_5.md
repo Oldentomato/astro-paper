@@ -1,7 +1,7 @@
 ---
 author: Jowoosung
 title: fastapi를 이용한 ai 서버 구축
-featured: true
+featured: false
 draft: false
 slug: fastapi를-이용한-ai-서버-구축
 pubDatetime: 2023-05-29T15:22:00Z

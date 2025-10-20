@@ -1,7 +1,7 @@
 ---
 author: Jowoosung
 title: contour에 대하여
-featured: true
+featured: false
 draft: false
 slug: contour에-대하여
 pubDatetime: 2022-06-26T15:22:00Z

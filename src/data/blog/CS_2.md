@@ -1,7 +1,7 @@
 ---
 author: Jowoosung
 title: 시간복잡도란
-featured: true
+featured: false
 draft: false
 slug: 시간복잡도란
 pubDatetime: 2023-05-07T15:22:00Z

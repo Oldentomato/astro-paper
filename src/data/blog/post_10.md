@@ -1,7 +1,7 @@
 ---
 author: Jowoosung
 title: 아마존 vpn 터널링
-featured: true
+featured: false
 draft: false
 slug: 아마존-vpn-터널링
 pubDatetime: 2025-08-19T15:22:00Z

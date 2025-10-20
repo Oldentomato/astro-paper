@@ -1,7 +1,7 @@
 ---
 author: Jowoosung
 title: 바다코끼리 연산자 := (walrus operator)
-featured: true
+featured: false
 draft: false
 slug: 바다코끼리-연산자-(walrus-operator)
 pubDatetime: 2024-01-22T15:22:00Z

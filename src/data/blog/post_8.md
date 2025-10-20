@@ -1,7 +1,7 @@
 ---
 author: Jowoosung
 title: ElasticSearch 설명 
-featured: true
+featured: false
 draft: false
 slug: ElasticSearch-설명 
 pubDatetime: 2025-07-17T15:22:00Z

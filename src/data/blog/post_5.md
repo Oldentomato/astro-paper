@@ -1,7 +1,7 @@
 ---
 author: Jowoosung
 title: 로드밸런싱 구현 정리
-featured: true
+featured: false
 draft: false
 slug: 로드밸런싱-구현-정리
 pubDatetime: 2024-11-20T15:22:00Z

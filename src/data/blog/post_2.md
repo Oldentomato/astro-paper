@@ -1,7 +1,7 @@
 ---
 author: Jowoosung
 title: 도커 서버구성 주의점 
-featured: true
+featured: false
 draft: false
 slug: 도커-서버구성-주의점 
 pubDatetime: 2024-10-26T15:22:00Z

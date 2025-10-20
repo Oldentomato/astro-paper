@@ -1,7 +1,7 @@
 ---
 author: Jowoosung
 title: 딥러닝 개요
-featured: true
+featured: false
 draft: false
 slug: 딥러닝-개요
 pubDatetime: 2023-04-24T15:22:00Z

@@ -1,7 +1,7 @@
 ---
 author: Jowoosung
 title: 히스토그램 평활화
-featured: true
+featured: false
 draft: false
 slug: 히스토그램-평활화
 pubDatetime: 2022-04-03T15:22:00Z

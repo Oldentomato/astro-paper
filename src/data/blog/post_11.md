@@ -1,7 +1,7 @@
 ---
 author: Jowoosung
 title: EKS CI/CD 구성 
-featured: true
+featured: false
 draft: false
 slug: EKS-CI/CD-구성 
 pubDatetime: 2025-08-24T15:22:00Z

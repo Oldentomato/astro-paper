@@ -1,7 +1,7 @@
 ---
 author: Jowoosung
 title: Latent space 간단 정리
-featured: true
+featured: false
 draft: false
 slug: Latent-space-간단-정리
 pubDatetime: 2023-05-10T15:22:00Z

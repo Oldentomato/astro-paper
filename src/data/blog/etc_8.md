@@ -1,7 +1,7 @@
 ---
 author: Jowoosung
 title: tensor-serving 서버 구축
-featured: true
+featured: false
 draft: false
 slug: tensor-serving-서버-구축
 pubDatetime: 2023-06-30T15:22:00Z

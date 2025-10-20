@@ -1,7 +1,7 @@
 ---
 author: Jowoosung
 title: 평균제곱오차(MSE) 개념 및 특징
-featured: true
+featured: false
 draft: false
 slug: 평균제곱오차(MSE)-개념-및-특징
 pubDatetime: 2023-02-11T15:22:00Z

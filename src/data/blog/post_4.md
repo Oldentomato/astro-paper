@@ -1,7 +1,7 @@
 ---
 author: Jowoosung
 title: 젠킨스와 도커
-featured: true
+featured: false
 draft: false
 slug: 젠킨스와-도커
 pubDatetime: 2024-11-04T15:22:00Z

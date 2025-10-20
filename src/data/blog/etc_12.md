@@ -1,7 +1,7 @@
 ---
 author: Jowoosung
 title: wsl2와 도커 환경 구성하기
-featured: true
+featured: false
 draft: false
 slug: wsl2와-도커-환경-구성하기
 pubDatetime: 2023-10-09T15:22:00Z

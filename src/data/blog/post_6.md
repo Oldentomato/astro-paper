@@ -1,7 +1,7 @@
 ---
 author: Jowoosung
 title: 쿠키, 세션, 웹스토리지
-featured: true
+featured: false
 draft: false
 slug: 쿠키,-세션,-웹스토리지
 pubDatetime: 2025-01-16T15:22:00Z

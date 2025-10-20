@@ -1,7 +1,7 @@
 ---
 author: Jowoosung
 title: Docker란
-featured: true
+featured: false
 draft: false
 slug: Docker란
 pubDatetime: 2023-08-25T15:22:00Z

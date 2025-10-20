@@ -1,7 +1,7 @@
 ---
 author: Jowoosung
 title: Auto Encoder란
-featured: true
+featured: false
 draft: false
 slug: Auto-Encoder란
 pubDatetime: 2023-05-10T15:22:00Z

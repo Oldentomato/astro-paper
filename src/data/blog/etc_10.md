@@ -1,7 +1,7 @@
 ---
 author: Jowoosung
 title: 우분투 cuda, cudnn 설치법
-featured: true
+featured: false
 draft: false
 slug: 우분투-cuda,-cudnn-설치법
 pubDatetime: 2023-08-04T15:22:00Z

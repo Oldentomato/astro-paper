@@ -1,7 +1,7 @@
 ---
 author: Jowoosung
 title: fly.io를 이용한 ai서버 배포
-featured: true
+featured: false
 draft: false
 slug: fly.io를-이용한-ai서버-배포
 pubDatetime: 2023-07-29T15:22:00Z

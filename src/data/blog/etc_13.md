@@ -1,7 +1,7 @@
 ---
 author: Jowoosung
 title: kafka란?
-featured: true
+featured: false
 draft: false
 slug: kafka란?
 pubDatetime: 2024-03-15T15:22:00Z

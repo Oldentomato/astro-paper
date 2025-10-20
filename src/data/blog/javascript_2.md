@@ -1,7 +1,7 @@
 ---
 author: Jowoosung
 title: map() 함수에서의 문제
-featured: true
+featured: false
 draft: false
 slug: map()-함수에서의-문제
 pubDatetime: 2022-07-15T15:22:00Z

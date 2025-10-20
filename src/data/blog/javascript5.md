@@ -1,7 +1,7 @@
 ---
 author: Jowoosung
 title: meta tag 메타태그란?
-featured: true
+featured: false
 draft: false
 slug: meta-tag-메타태그란?
 pubDatetime: 2023-01-21T15:22:00Z

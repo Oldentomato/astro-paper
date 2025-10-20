@@ -1,7 +1,7 @@
 ---
 author: Jowoosung
 title: 프로그래밍 패러다임
-featured: true
+featured: false
 draft: false
 slug: 프로그래밍-패러다임
 pubDatetime: 2023-05-07T15:22:00Z

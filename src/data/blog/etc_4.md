@@ -1,7 +1,7 @@
 ---
 author: Jowoosung
 title: gcp에서 mysql 사용하기
-featured: true
+featured: false
 draft: false
 slug: gcp에서-mysql-사용하기
 pubDatetime: 2023-05-16T15:22:00Z

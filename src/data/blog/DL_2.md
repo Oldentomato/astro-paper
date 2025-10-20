@@ -1,7 +1,7 @@
 ---
 author: Jowoosung
 title: 과대적합과 과소적합
-featured: true
+featured: false
 draft: false
 slug: 과대적합과-과소적합
 pubDatetime: 2022-06-26T15:22:00Z

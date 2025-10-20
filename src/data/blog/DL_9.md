@@ -1,7 +1,7 @@
 ---
 author: Jowoosung
 title: 교차검증이란
-featured: true
+featured: false
 draft: false
 slug: 교차검증이란
 pubDatetime: 2023-06-02T15:22:00Z

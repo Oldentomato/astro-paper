@@ -1,7 +1,7 @@
 ---
 author: Jowoosung
 title: ImageDataGenerator이란?
-featured: true
+featured: false
 draft: false
 slug: ImageDataGenerator이란?
 pubDatetime: 2022-06-26T15:22:00Z
