@@ -183,6 +183,15 @@ llm요청 코드는 다음과 같다.
                 return {"error": "웹 검색에서 문제가 발생했습니다."}
 ```
 stream과 json 응답형식 이렇게 2개로 나누었다.  
+그리고 이걸 다음코드를 통해 로드시킨다.  
+```python
+@app.on_event("startup")
+async def load_startup():
+    print("Loading LLM model on startup...")
+    app.state.load_llm = LoadLLM()
+    app.state.load_llm.initialize_engine(getApiKey("LLM_BASE_MODEL_PATH"), "bitsandbytes")  # 원하는 모델로 변경 가능
+    print("LLM Loaded!")
+```
 
 ## 기능 워크플로우  
 해당 지역에 관한 큐레이팅 요청 워크플로우이다.  
