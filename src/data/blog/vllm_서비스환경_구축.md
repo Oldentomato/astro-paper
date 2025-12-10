@@ -7,7 +7,8 @@
   featured: false
   draft: false
   tags:
-    - ai,infra
+    - ai
+    - infra
   description: vllm과 fastAPI를 이용한 LLM inference환경 구축
 ---
 ## Table of contents  
