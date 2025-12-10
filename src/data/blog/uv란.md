@@ -2,8 +2,8 @@
   author: jowoosung
   pubDatetime: 2025-12-10T07:07:15.987Z
   modDatetime: 2025-12-10T07:07:16.836Z
-  title: uv란?
-  slug: uv란?
+  title: uv란
+  slug: uv란
   featured: false
   draft: false
   tags: 
