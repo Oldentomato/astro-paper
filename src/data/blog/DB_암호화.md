@@ -11,7 +11,7 @@
     - secure
   description: DB 암호화하는 방법을 fastAPI를 이용하여 구성
 ---
-## Table of contents. 
+## Table of contents
 ## DB 암호화
 요즘처럼 보안에 민감한 시기에 db를 암호화하는 방법에 대해 심도있게 공부하려한다.  
 이 글은 다음 블로그의 내용을 참고하여 작성되었다.  
