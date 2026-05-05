@@ -42,8 +42,7 @@ config:
     provider = "<인증할 서비스 예:google>"
     authenticated_emails_file = "<허용 url 리스트 txt파일 path>"
     cookie_secure = true
-    upstreams = ["<인증 후 다시 리다이렉트할 url>"]
-    redirect_url = "<인증 리다이렉트 url>"
+    redirect_url = "<인증 후 리다이렉트 url>"
     pass_authorization_header = true
     set_authorization_header = true
     cookie_name = "_oauth2_proxy"
@@ -56,6 +55,10 @@ config:
 extraArgs:
   - --reverse-proxy
   - --skip-provider-button
+  - --proxy-prefix=/oauth2
+  - --custom-templates-dir=/templates
+  - --cookie-csrf-per-request=true
+  - --cookie-csrf-expire=5m
 
 extraVolumes:
   - name: auth-emails
@@ -67,7 +70,8 @@ extraVolumeMounts:
     mountPath: /etc/oauth2-proxy
 
 ```
-여기에 보면 아래에 extraVolumes와 extraVolumeMounts가 보이는데 authenticated_emails_file = "<허용 url 리스트 txt파일 path>" 을 위한 설정들이다. 이 txt파일에 허용할 email들을 입력하면 된다. 그 설정 명령어는
+여기서 중요한 것은 extraArgs의 --cookie-csrf-per-request=true인데, 이 옵션이 없으면 google 로그인 후에, 403에러로 넘어가지 못한다(csrf 토큰발급이 안되기 때문)
+그리고 아래에 extraVolumes와 extraVolumeMounts가 보이는데 authenticated_emails_file = "<허용 url 리스트 txt파일 path>" 을 위한 설정들이다. 이 txt파일에 허용할 email들을 입력하면 된다. 그 설정 명령어는
 
 ```bash
 kubectl create configmap oauth2-proxy-auth-emails \
@@ -93,8 +97,24 @@ spec:
       - "X-Auth-Request-User"
       - "X-Auth-Request-Email"
       - "Authorization"
+---
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: oauth-errors
+  namespace: o11y
+spec:
+  errors:
+    status:
+      - "401-403"
+    service:
+      name: oauth2-proxy
+      port: 80
+    query: "/oauth2/sign_in?rd={url}"
 ```
-
+미들웨어 설정으로써 모든 ingress 설정의 annotation에 이 두 개의 미들웨어를 입력하면 동작한다.  
+위는 접근 시 oauth.proxy로 넘어가는 미들웨어이고,  
+아래는 로그인 전 상태의 핸들러이고 리다이렉트 이후 동작(query)을 설정해주는 미들웨어이다.
 ```yaml
 apiVersion: networking.k8s.io/v1
 kind: Ingress
@@ -102,7 +122,6 @@ metadata:
   name: oauth2-proxy-ingress
   namespace: o11y
   annotations:
-    traefik.ingress.kubernetes.io/auth-type: basic
     cert-manager.io/cluster-issuer: letsencrypt-staging
 spec:
   ingressClassName: traefik 
@@ -171,21 +190,7 @@ kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/
 ```
 
 ### yaml 설정  
-다음 3개의 yaml을 kubectl apply 하여 설정해주면 tls설정은 끝난다.
-```yaml
-apiVersion: cert-manager.io/v1
-kind: Certificate
-metadata:
-  name: cert-manager-staging
-  namespace: <서비스의 네임스페이스>
-spec:
-  secretName: cert-manager-staging # 여기는 아무거나 적어도 된다고 하지만 Certificate의 name과 동일하게 하면 헷갈리지 않는다.
-  issuerRef:
-    name: letsencrypt-staging # cluster issuer 이름 적기
-    kind: ClusterIssuer
-  dnsNames:
-    - <지정할 웹 url>
-```
+다음 yaml을 kubectl apply 하여 기본적인 clusterissuer를 설정해준다.  
 ```yaml
 apiVersion: cert-manager.io/v1
 kind: ClusterIssuer
@@ -203,31 +208,38 @@ spec:
         ingress:
           class: <사용하고 있는 proxy class 이름 예:traefik>
 ```
+실제로 사용할 때는 annotation애 다음과 같은 문구를 추가해주고,  
 ```yaml
-apiVersion: traefik.io/v1alpha1
-kind: IngressRoute
+annotations:
+  ...
+  cert-manager.io/cluster-issuer: letsencrypt-prod
+  ...
+```  
+각 서비스 마다(네임스페이스 별로) Certificate.yaml을 만들어 다음 내용처럼 작성한다.  
+```yaml
+apiVersion: cert-manager.io/v1
+kind: Certificate
 metadata:
-  name: post-ingress-route
+  name: cert-manager-staging
   namespace: <서비스의 네임스페이스>
 spec:
-  entryPoints:
-    - websecure
-    - web
-  routes:
-  - match: Host(`<tls를 설정할 웹 url>`)
-    kind: Rule
-    services:
-    - name: <해당 웹의 서비스명>
-      port: 80
-  - match: Host(`<tls를 설정할 웹 url>`)
-    kind: Rule
-    services:
-    - name: <해당 웹의 서비스명>
-      port: 4000
-  tls:
-    secretName: cert-manager-staging # certificate에서 설정한 secretName과 동일한 이름
-
+  secretName: cert-manager-staging # 사용할 이름
+  issuerRef:
+    name: letsencrypt-staging # cluster issuer 이름 적기
+    kind: ClusterIssuer
+  dnsNames:
+    - <지정할 웹 url>
 ```
+그리고 실제 서비스의 ingress에서 spec 내에 rules 상단에 다음 내용을 작성한다.  
+이 때 secretName이 위에 Certificate에서 쓴 이름을 쓰면 된다.  
+```yaml
+  tls:
+  - hosts:
+      - <사용할 dns>
+    secretName: cert-manager-prod
+  rules: ...
+```
+
 ClusterIssuer부분을 보면 server: https://acme-staging-v02.api.letsencrypt.org/directory 로 되어있고 이름도 -staging이 붙어있다.  
 이는 실제 acme 인증서발급이 아니라 테스트를 위한 임시 인증서 발급이다. 실제 인증서를 발급하려면 위 주석을 해제하고 아래거는 지운 다음 모든 곳에 -staging이라고 붙은 것들을 지워준다.  
 
