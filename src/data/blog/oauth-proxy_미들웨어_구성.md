@@ -1,7 +1,7 @@
 ---
   author: jowoosung
   pubDatetime: 2025-10-14T04:19:50.812Z
-  modDatetime: 2025-10-14T04:19:51.079Z
+  modDatetime: 2026-05-05T05:37:04.726Z
   title: oauth-proxy 미들웨어 구성
   slug: oauth-proxy-미들웨어-구성
   featured: true
