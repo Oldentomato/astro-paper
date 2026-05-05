@@ -57,7 +57,7 @@ Docker Hub와 동일하다고 볼 수 있지만 장점으로는 S3로 Docker Ima
 
 
 ### EFS  
-![img4](https://blog.kakaocdn.net/dna/bfOSCy/btsFK5HHuXo/AAAAAAAAAAAAAAAAAAAAABf_xiW5DSsqRYltfC2fkRQIBgL46RKl4IKggGmjH49J/img.png?credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&expires=1761922799&allow_ip=&allow_referer=&signature=FcXA3SibdAuu%2BICsngSPuAM0tBw%3D)  
+![img4](https://docs.aws.amazon.com/ko_kr/efs/latest/ug/images/efs-ec2-how-it-works-Regional_china-world.png)  
 AWS 클라우드 서비스와 온프레미스 리소스에서 사용할 수 있는 간단하고 확장 가능하며 탄력적인 파일 스토리지를 제공하는 서비스이다.  
 EFS는 리눅스 인스턴스를 위한 확장성, 공유성 높은 파일 스토리지로, EC2 Linux 인스턴스에 마운트된 Network File System을 통해 VPC에서 필요한 파일에 접근하거나 AWS Direct Connect로 연결된 온프레미스 서버의 파일에 접근할 수 있다.  
 
