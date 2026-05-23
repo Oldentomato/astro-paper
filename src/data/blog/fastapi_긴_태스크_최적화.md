@@ -7,7 +7,8 @@
   featured: true
   draft: false
   tags:
-    - python, infra
+    - python
+    - infra
   description: 서버에서 큰 백그라운드 작업에 의한 영향 간섭 최적화
 ---
 ## Table of contents
